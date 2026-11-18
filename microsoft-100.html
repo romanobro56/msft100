@@ -6,7 +6,7 @@
 <title>Microsoft 100</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%233a5bd9'/%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
-/* Layout: one narrow column. A strip with one cell per problem shows progress, a pinned "up next" card, then four laps of rows. */
+/* Layout: one narrow column. A strip with one cell per problem shows progress, a pinned "up next" card, then four laps of rows. The Refresh 50 track repeats that layout below. */
 :root {
   --bg: #f2f5f7;
   --surface: #ffffff;
@@ -70,7 +70,7 @@ header { display: flex; flex-direction: column; gap: 14px; }
 h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(30px, 6vw, 40px); letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
 .count { font-family: var(--font-mono); font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .count b { color: var(--ink); font-size: 22px; font-weight: 600; }
-/* 100 problems = 4 full rows of 25. */
+/* 100 problems = 4 full rows of 25; the refresh track is 2 rows. */
 .strip { display: grid; grid-template-columns: repeat(25, 1fr); gap: 3px; }
 .cell { aspect-ratio: 1; max-width: 100%; min-width: 0; border-radius: 2px; background: var(--hatch); border: 0; padding: 0; cursor: pointer; }
 .cell.done { background: var(--accent); }
@@ -98,6 +98,8 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(30px, 
 .btn:hover { filter: brightness(1.05); }
 .pace { font-size: 13px; color: var(--muted); }
 
+section.track { display: flex; flex-direction: column; gap: 14px; padding-top: 28px; border-top: 2px solid var(--line); }
+.track-h { font-family: var(--font-display); font-weight: 800; font-size: clamp(24px, 5vw, 30px); letter-spacing: -0.02em; margin: 0; }
 section.lap { display: flex; flex-direction: column; gap: 10px; }
 .lap-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .lap-head h3 { font-family: var(--font-display); font-weight: 600; font-size: 19px; margin: 0; }
@@ -190,6 +192,18 @@ footer { font-size: 13px; color: var(--muted); }
 
   <div id="laps" style="display:flex;flex-direction:column;gap:28px"></div>
 
+  <section class="track" aria-labelledby="refreshTitle">
+    <div class="top">
+      <h2 class="track-h" id="refreshTitle">Refresh 50</h2>
+      <div class="count"><b id="rCount">0</b> / <span id="rTotal">50</span> refreshed</div>
+    </div>
+    <p class="lap-blurb">Problems you've already solved, ranked by the same Microsoft frequency and SWE 1 tuning as the 100. Re-solve each one from scratch, then tick it and rate your confidence.</p>
+    <div class="strip" id="rStrip" aria-label="Refresh progress, one cell per problem"></div>
+    <div class="conf-sum" id="rConfSum" aria-live="polite"></div>
+    <div class="next-card" id="rNextCard"></div>
+    <div id="rLaps" style="display:flex;flex-direction:column;gap:28px"></div>
+  </section>
+
   <footer style="display:flex;flex-direction:column;gap:12px">
     <div class="backup">
       <button class="btn" type="button" id="linkBtn">Link progress.json</button>
@@ -201,13 +215,14 @@ footer { font-size: 13px; color: var(--muted); }
       <input type="file" id="importFile" accept=".json,application/json" hidden>
       <span class="note" id="backupNote"></span>
     </div>
-    <div>Progress, revealed patterns and confidence are saved in this browser, so they survive restarts and work offline. Once progress.json is linked, every change is also written to that file: commit and push it, then pull on another device and the newer copy wins. Clearing Chrome's browsing data erases the browser copy, so keep progress.json pushed or download a backup now and then. Patterns stay hidden until you tick a problem or press Show. Ranked by your LeetCode Premium Microsoft frequency on 2026-11-17 and tuned for SWE 1 / IC2, with your 236 solved problems removed. "SDE 1 report" marks problems named in Microsoft SDE 1 / L59 / L60 / new-grad interview posts.</div>
+    <div>Progress, revealed patterns and confidence are saved in this browser, so they survive restarts and work offline. Once progress.json is linked, every change is also written to that file: commit and push it, then pull on another device and the newer copy wins. Clearing Chrome's browsing data erases the browser copy, so keep progress.json pushed or download a backup now and then. Patterns stay hidden until you tick a problem or press Show. Ranked by your LeetCode Premium Microsoft frequency on 2026-11-17 and tuned for SWE 1 / IC2, with your 236 solved problems removed. Refresh 50 is the top 50 of your solved problems on the same ranking (243 solved on 2026-11-18), skipping trivial Easys. "SDE 1 report" marks problems named in Microsoft SDE 1 / L59 / L60 / new-grad interview posts.</div>
   </footer>
 </div>
 
 <script>
-const DATA = {"rows":[{"n":1,"t":"Merge Sorted Array","s":"merge-sorted-array","d":"E","p":"Two pointers from the back","l":1,"src":"T"},{"n":2,"t":"Majority Element","s":"majority-element","d":"E","p":"Boyer-Moore voting (like Majority Element II)","l":1,"src":"T"},{"n":3,"t":"Rotate Array","s":"rotate-array","d":"M","p":"Reverse three times","l":1,"src":"T"},{"n":4,"t":"Next Permutation","s":"next-permutation","d":"M","p":"Find pivot, swap, reverse suffix","l":1,"src":"T"},{"n":5,"t":"Minimum Operations to Sort a Permutation","s":"minimum-operations-to-sort-a-permutation","d":"M","p":"Case analysis on reversals","l":1,"src":"T"},{"n":6,"t":"Number of Perfect Pairs","s":"number-of-perfect-pairs","d":"M","p":"Sort by absolute value + two pointers","l":1,"src":"T"},{"n":7,"t":"Roman to Integer","s":"roman-to-integer","d":"E","p":"Symbol mapping, subtract when smaller (you never got it accepted)","l":1,"src":"T"},{"n":8,"t":"Count Vowel Substrings of a String","s":"count-vowel-substrings-of-a-string","d":"E","p":"Sliding window, all five vowels","l":1,"src":"T"},{"n":9,"t":"Maximum Sum of Distinct Subarrays With Length K","s":"maximum-sum-of-distinct-subarrays-with-length-k","d":"M","p":"Fixed window + hashmap","l":1,"src":"T"},{"n":10,"t":"Maximum Points You Can Obtain from Cards","s":"maximum-points-you-can-obtain-from-cards","d":"M","p":"Reframe as a fixed middle window","l":1,"src":"T"},{"n":11,"t":"Maximum Number of Occurrences of a Substring","s":"maximum-number-of-occurrences-of-a-substring","d":"M","p":"Fixed window + counts (only minSize matters)","l":1,"src":"T"},{"n":12,"t":"Single Element in a Sorted Array","s":"single-element-in-a-sorted-array","d":"M","p":"Binary search on parity","l":1,"src":"R"},{"n":13,"t":"House Robber IV","s":"house-robber-iv","d":"M","p":"Binary search on answer + greedy check (like Koko/Capacity)","l":1,"src":"T"},{"n":14,"t":"Minimum Operations to Reduce an Integer to 0","s":"minimum-operations-to-reduce-an-integer-to-0","d":"M","p":"Greedy on bits, runs of 1s","l":1,"src":"T"},{"n":15,"t":"Consecutive Numbers Sum","s":"consecutive-numbers-sum","d":"H","p":"Math: count valid run lengths","l":1,"src":"T"},{"n":16,"t":"Jump Game","s":"jump-game","d":"M","p":"Greedy farthest reach","l":1,"src":"T"},{"n":17,"t":"Partition Equal Subset Sum","s":"partition-equal-subset-sum","d":"M","p":"0/1 knapsack","l":1,"src":"T"},{"n":18,"t":"Longest Palindromic Subsequence","s":"longest-palindromic-subsequence","d":"M","p":"Interval DP","l":1,"src":"T"},{"n":19,"t":"Minimum Difficulty of a Job Schedule","s":"minimum-difficulty-of-a-job-schedule","d":"H","p":"Partition DP over days (your top Microsoft problem)","l":1,"src":"T"},{"n":20,"t":"Rotate List","s":"rotate-list","d":"M","p":"Close the ring, cut at n - k","l":1,"src":"T"},{"n":21,"t":"Sort List","s":"sort-list","d":"M","p":"Merge sort on a linked list (like Merge Two Sorted Lists)","l":1,"src":"T"},{"n":22,"t":"Reverse Nodes in k-Group","s":"reverse-nodes-in-k-group","d":"H","p":"Linked list reversal in groups (like Reverse Linked List)","l":1,"src":"T"},{"n":23,"t":"Validate Binary Search Tree","s":"validate-binary-search-tree","d":"M","p":"DFS with bounds","l":1,"src":"T"},{"n":24,"t":"Design Hit Counter","s":"design-hit-counter","d":"M","p":"Queue of timestamps / circular buckets","l":1,"src":"T"},{"n":25,"t":"Design a Text Editor","s":"design-a-text-editor","d":"H","p":"Two stacks around the cursor","l":1,"src":"T"},{"n":26,"t":"Sort an Array","s":"sort-an-array","d":"M","p":"Merge sort or heap sort by hand","l":2,"src":"T"},{"n":27,"t":"Sort Characters By Frequency","s":"sort-characters-by-frequency","d":"M","p":"Bucket sort by count","l":2,"src":"T"},{"n":28,"t":"Largest Number","s":"largest-number","d":"M","p":"Custom comparator sort","l":2,"src":"R"},{"n":29,"t":"4Sum","s":"4sum","d":"M","p":"Sort + two pointers (like 3Sum)","l":2,"src":"T"},{"n":30,"t":"Fruit Into Baskets","s":"fruit-into-baskets","d":"M","p":"Sliding window, at most two kinds","l":2,"src":"T"},{"n":31,"t":"Contiguous Array","s":"contiguous-array","d":"M","p":"Prefix sum + hashmap, balance trick (like Subarray Sum Equals K)","l":2,"src":"T"},{"n":32,"t":"Smallest Stable Index II","s":"smallest-stable-index-ii","d":"M","p":"Prefix max + suffix min","l":2,"src":"T"},{"n":33,"t":"Count Commas in Range II","s":"count-commas-in-range-ii","d":"M","p":"Count by digit-length ranges","l":2,"src":"T"},{"n":34,"t":"Find First and Last Position of Element in Sorted Array","s":"find-first-and-last-position-of-element-in-sorted-array","d":"M","p":"Binary search bounds","l":2,"src":"T"},{"n":35,"t":"Split Array Largest Sum","s":"split-array-largest-sum","d":"H","p":"Binary search on answer, minimize the max (like #13)","l":2,"src":"T"},{"n":36,"t":"Minimum Sum of Squared Difference","s":"minimum-sum-of-squared-difference","d":"M","p":"Greedy level-down of the largest gaps","l":2,"src":"T"},{"n":37,"t":"Valid Parenthesis String","s":"valid-parenthesis-string","d":"M","p":"Greedy range of open counts","l":2,"src":"T"},{"n":38,"t":"Basic Calculator II","s":"basic-calculator-ii","d":"M","p":"Stack expression eval","l":2,"src":"T"},{"n":39,"t":"Basic Calculator","s":"basic-calculator","d":"H","p":"Stack with parentheses","l":2,"src":"T"},{"n":40,"t":"Online Stock Span","s":"online-stock-span","d":"M","p":"Monotonic stack on a stream (like Daily Temperatures)","l":2,"src":"T"},{"n":41,"t":"Beautiful Towers II","s":"beautiful-towers-ii","d":"M","p":"Monotonic stack, prefix and suffix sums","l":2,"src":"T"},{"n":42,"t":"Longest Increasing Subsequence","s":"longest-increasing-subsequence","d":"M","p":"DP / patience sort","l":2,"src":"T"},{"n":43,"t":"Delete and Earn","s":"delete-and-earn","d":"M","p":"House Robber over values (like House Robber)","l":2,"src":"T"},{"n":44,"t":"Edit Distance","s":"edit-distance","d":"M","p":"2D DP","l":2,"src":"T"},{"n":45,"t":"Subsets II","s":"subsets-ii","d":"M","p":"Backtracking, skip duplicates (like Subsets)","l":2,"src":"T"},{"n":46,"t":"Palindrome Partitioning","s":"palindrome-partitioning","d":"M","p":"Backtracking + palindrome check","l":2,"src":"T"},{"n":47,"t":"Maximum XOR of Two Numbers in an Array","s":"maximum-xor-of-two-numbers-in-an-array","d":"M","p":"Bitwise trie, greedy from the top bit","l":2,"src":"T"},{"n":48,"t":"Palindrome Linked List","s":"palindrome-linked-list","d":"E","p":"Reverse the second half","l":2,"src":"T"},{"n":49,"t":"Binary Tree Zigzag Level Order Traversal","s":"binary-tree-zigzag-level-order-traversal","d":"M","p":"BFS, alternate direction (like Level Order Traversal)","l":2,"src":"T"},{"n":50,"t":"Alien Dictionary","s":"alien-dictionary","d":"H","p":"Topological sort from constraints (like Course Schedule)","l":2,"src":"R"},{"n":51,"t":"Integer to Roman","s":"integer-to-roman","d":"M","p":"Greedy symbol mapping (reverse of #7)","l":3,"src":"T"},{"n":52,"t":"Minimum Insertions to Balance a Parentheses String","s":"minimum-insertions-to-balance-a-parentheses-string","d":"M","p":"Greedy counter of needed closes","l":3,"src":"T"},{"n":53,"t":"Maximum Nesting Depth of Two Valid Parentheses Strings","s":"maximum-nesting-depth-of-two-valid-parentheses-strings","d":"M","p":"Split by depth parity","l":3,"src":"T"},{"n":54,"t":"Remove K Digits","s":"remove-k-digits","d":"M","p":"Monotonic stack, greedy","l":3,"src":"T"},{"n":55,"t":"Next Greater Element II","s":"next-greater-element-ii","d":"M","p":"Monotonic stack, circular","l":3,"src":"T"},{"n":56,"t":"Find All Anagrams in a String","s":"find-all-anagrams-in-a-string","d":"M","p":"Fixed window + counts (like Permutation in String)","l":3,"src":"T"},{"n":57,"t":"Minimum Size Subarray Sum","s":"minimum-size-subarray-sum","d":"M","p":"Sliding window, shrink while valid","l":3,"src":"T"},{"n":58,"t":"Maximum Sum Circular Subarray","s":"maximum-sum-circular-subarray","d":"M","p":"Kadane, track max and min (like Maximum Subarray)","l":3,"src":"T"},{"n":59,"t":"Corporate Flight Bookings","s":"corporate-flight-bookings","d":"M","p":"Difference array","l":3,"src":"T"},{"n":60,"t":"Random Pick with Weight","s":"random-pick-with-weight","d":"M","p":"Prefix sum + binary search","l":3,"src":"T"},{"n":61,"t":"Maximize Greatness of an Array","s":"maximize-greatness-of-an-array","d":"M","p":"Sort + two pointers","l":3,"src":"T"},{"n":62,"t":"Boats to Save People","s":"boats-to-save-people","d":"M","p":"Sort + two pointers","l":3,"src":"T"},{"n":63,"t":"Find K Pairs with Smallest Sums","s":"find-k-pairs-with-smallest-sums","d":"M","p":"Min-heap frontier","l":3,"src":"T"},{"n":64,"t":"Single Number II","s":"single-number-ii","d":"M","p":"Count bits mod 3","l":3,"src":"T"},{"n":65,"t":"Rotate Image","s":"rotate-image","d":"M","p":"Transpose + reverse rows","l":3,"src":"R"},{"n":66,"t":"Image Overlap","s":"image-overlap","d":"M","p":"Count translation vectors","l":3,"src":"T"},{"n":67,"t":"Number of Closed Islands","s":"number-of-closed-islands","d":"M","p":"DFS, flood the border first (like Number of Islands)","l":3,"src":"T"},{"n":68,"t":"Rotting Oranges","s":"rotting-oranges","d":"M","p":"Multi-source BFS","l":3,"src":"T"},{"n":69,"t":"All Nodes Distance K in Binary Tree","s":"all-nodes-distance-k-in-binary-tree","d":"M","p":"Tree to graph + BFS","l":3,"src":"T"},{"n":70,"t":"Serialize and Deserialize Binary Tree","s":"serialize-and-deserialize-binary-tree","d":"H","p":"Preorder encode/decode","l":3,"src":"T"},{"n":71,"t":"Reorder List","s":"reorder-list","d":"M","p":"Fast/slow + reverse + merge","l":3,"src":"T"},{"n":72,"t":"Reverse Linked List II","s":"reverse-linked-list-ii","d":"M","p":"Linked list surgery","l":3,"src":"T"},{"n":73,"t":"Decode Ways","s":"decode-ways","d":"M","p":"1D DP on a string","l":3,"src":"T"},{"n":74,"t":"Coin Change II","s":"coin-change-ii","d":"M","p":"Unbounded knapsack, count ways (like Coin Change)","l":3,"src":"T"},{"n":75,"t":"Stone Game","s":"stone-game","d":"M","p":"Interval DP / game theory","l":3,"src":"T"},{"n":76,"t":"Best Time to Buy and Sell Stock II","s":"best-time-to-buy-and-sell-stock-ii","d":"M","p":"Greedy: sum every rise","l":4,"src":"T"},{"n":77,"t":"Jump Game II","s":"jump-game-ii","d":"M","p":"Greedy BFS levels (like #16)","l":4,"src":"T"},{"n":78,"t":"Increasing Triplet Subsequence","s":"increasing-triplet-subsequence","d":"M","p":"Greedy two smallest (you never got it accepted)","l":4,"src":"T"},{"n":79,"t":"Destroying Asteroids","s":"destroying-asteroids","d":"M","p":"Sort + greedy absorb","l":4,"src":"T"},{"n":80,"t":"Car Fleet","s":"car-fleet","d":"M","p":"Sort + stack (you never got it accepted)","l":4,"src":"T"},{"n":81,"t":"Frequency of the Most Frequent Element","s":"frequency-of-the-most-frequent-element","d":"M","p":"Sort + sliding window","l":4,"src":"T"},{"n":82,"t":"Find the Smallest Divisor Given a Threshold","s":"find-the-smallest-divisor-given-a-threshold","d":"M","p":"Binary search on answer (like Koko/Capacity)","l":4,"src":"T"},{"n":83,"t":"Search a 2D Matrix II","s":"search-a-2d-matrix-ii","d":"M","p":"Staircase search (like Search a 2D Matrix)","l":4,"src":"T"},{"n":84,"t":"Set Matrix Zeroes","s":"set-matrix-zeroes","d":"M","p":"In-place markers in the first row and column","l":4,"src":"T"},{"n":85,"t":"Maximum OR","s":"maximum-or","d":"M","p":"Prefix/suffix OR, double one element","l":4,"src":"T"},{"n":86,"t":"Count Subarrays With Majority Element I","s":"count-subarrays-with-majority-element-i","d":"M","p":"Prefix balance (+1/-1) counting","l":4,"src":"T"},{"n":87,"t":"Non-overlapping Intervals","s":"non-overlapping-intervals","d":"M","p":"Interval greedy by end time","l":4,"src":"T"},{"n":88,"t":"Maximum Number of Events That Can Be Attended","s":"maximum-number-of-events-that-can-be-attended","d":"M","p":"Sort + min-heap of end days","l":4,"src":"T"},{"n":89,"t":"Add Bold Tag in String","s":"add-bold-tag-in-string","d":"M","p":"Mark matches, then merge intervals (like Merge Intervals)","l":4,"src":"X"},{"n":90,"t":"Longest Common Subsequence","s":"longest-common-subsequence","d":"M","p":"2D DP","l":4,"src":"T"},{"n":91,"t":"New 21 Game","s":"new-21-game","d":"M","p":"Probability DP + sliding window sum","l":4,"src":"T"},{"n":92,"t":"Beautiful Arrangement","s":"beautiful-arrangement","d":"M","p":"Backtracking with a used set","l":4,"src":"T"},{"n":93,"t":"Word Search","s":"word-search","d":"M","p":"Grid backtracking","l":4,"src":"R"},{"n":94,"t":"Snakes and Ladders","s":"snakes-and-ladders","d":"M","p":"BFS over board squares","l":4,"src":"R"},{"n":95,"t":"Delete Node in a Linked List","s":"delete-node-in-a-linked-list","d":"M","p":"Copy the next node and skip it","l":4,"src":"T"},{"n":96,"t":"Kth Smallest Element in a BST","s":"kth-smallest-element-in-a-bst","d":"M","p":"In-order traversal","l":4,"src":"T"},{"n":97,"t":"Longest Path With Different Adjacent Characters","s":"longest-path-with-different-adjacent-characters","d":"H","p":"Tree DP, top two child chains (like Diameter of Binary Tree)","l":4,"src":"R"},{"n":98,"t":"Implement Queue using Stacks","s":"implement-queue-using-stacks","d":"E","p":"Two stacks, amortized","l":4,"src":"T"},{"n":99,"t":"Design Twitter","s":"design-twitter","d":"M","p":"Design: hashmap + heap merge (like Merge k Sorted Lists)","l":4,"src":"R"},{"n":100,"t":"LFU Cache","s":"lfu-cache","d":"H","p":"Design: hashmap + frequency buckets (like LRU Cache)","l":4,"src":"R"}],"laps":{"1":"The top 25 by live Microsoft frequency. If you only finish one lap, make it this one.","2":"Ranks 26–50: sorting, sliding windows, stacks and the calculator pair.","3":"Parentheses, monotonic stacks, graphs, trees and linked lists.","4":"Remaining patterns, plus the design and tree problems from SDE 1 reports that Microsoft hasn't tagged in the last six months."}};
+const DATA = {"rows":[{"n":1,"t":"Merge Sorted Array","s":"merge-sorted-array","d":"E","p":"Two pointers from the back","l":1,"src":"T"},{"n":2,"t":"Majority Element","s":"majority-element","d":"E","p":"Boyer-Moore voting (like Majority Element II)","l":1,"src":"T"},{"n":3,"t":"Rotate Array","s":"rotate-array","d":"M","p":"Reverse three times","l":1,"src":"T"},{"n":4,"t":"Next Permutation","s":"next-permutation","d":"M","p":"Find pivot, swap, reverse suffix","l":1,"src":"T"},{"n":5,"t":"Minimum Operations to Sort a Permutation","s":"minimum-operations-to-sort-a-permutation","d":"M","p":"Case analysis on reversals","l":1,"src":"T"},{"n":6,"t":"Number of Perfect Pairs","s":"number-of-perfect-pairs","d":"M","p":"Sort by absolute value + two pointers","l":1,"src":"T"},{"n":7,"t":"Roman to Integer","s":"roman-to-integer","d":"E","p":"Symbol mapping, subtract when smaller (you never got it accepted)","l":1,"src":"T"},{"n":8,"t":"Count Vowel Substrings of a String","s":"count-vowel-substrings-of-a-string","d":"E","p":"Sliding window, all five vowels","l":1,"src":"T"},{"n":9,"t":"Maximum Sum of Distinct Subarrays With Length K","s":"maximum-sum-of-distinct-subarrays-with-length-k","d":"M","p":"Fixed window + hashmap","l":1,"src":"T"},{"n":10,"t":"Maximum Points You Can Obtain from Cards","s":"maximum-points-you-can-obtain-from-cards","d":"M","p":"Reframe as a fixed middle window","l":1,"src":"T"},{"n":11,"t":"Maximum Number of Occurrences of a Substring","s":"maximum-number-of-occurrences-of-a-substring","d":"M","p":"Fixed window + counts (only minSize matters)","l":1,"src":"T"},{"n":12,"t":"Single Element in a Sorted Array","s":"single-element-in-a-sorted-array","d":"M","p":"Binary search on parity","l":1,"src":"R"},{"n":13,"t":"House Robber IV","s":"house-robber-iv","d":"M","p":"Binary search on answer + greedy check (like Koko/Capacity)","l":1,"src":"T"},{"n":14,"t":"Minimum Operations to Reduce an Integer to 0","s":"minimum-operations-to-reduce-an-integer-to-0","d":"M","p":"Greedy on bits, runs of 1s","l":1,"src":"T"},{"n":15,"t":"Consecutive Numbers Sum","s":"consecutive-numbers-sum","d":"H","p":"Math: count valid run lengths","l":1,"src":"T"},{"n":16,"t":"Jump Game","s":"jump-game","d":"M","p":"Greedy farthest reach","l":1,"src":"T"},{"n":17,"t":"Partition Equal Subset Sum","s":"partition-equal-subset-sum","d":"M","p":"0/1 knapsack","l":1,"src":"T"},{"n":18,"t":"Longest Palindromic Subsequence","s":"longest-palindromic-subsequence","d":"M","p":"Interval DP","l":1,"src":"T"},{"n":19,"t":"Minimum Difficulty of a Job Schedule","s":"minimum-difficulty-of-a-job-schedule","d":"H","p":"Partition DP over days (your top Microsoft problem)","l":1,"src":"T"},{"n":20,"t":"Rotate List","s":"rotate-list","d":"M","p":"Close the ring, cut at n - k","l":1,"src":"T"},{"n":21,"t":"Sort List","s":"sort-list","d":"M","p":"Merge sort on a linked list (like Merge Two Sorted Lists)","l":1,"src":"T"},{"n":22,"t":"Reverse Nodes in k-Group","s":"reverse-nodes-in-k-group","d":"H","p":"Linked list reversal in groups (like Reverse Linked List)","l":1,"src":"T"},{"n":23,"t":"Validate Binary Search Tree","s":"validate-binary-search-tree","d":"M","p":"DFS with bounds","l":1,"src":"T"},{"n":24,"t":"Design Hit Counter","s":"design-hit-counter","d":"M","p":"Queue of timestamps / circular buckets","l":1,"src":"T"},{"n":25,"t":"Design a Text Editor","s":"design-a-text-editor","d":"H","p":"Two stacks around the cursor","l":1,"src":"T"},{"n":26,"t":"Sort an Array","s":"sort-an-array","d":"M","p":"Merge sort or heap sort by hand","l":2,"src":"T"},{"n":27,"t":"Sort Characters By Frequency","s":"sort-characters-by-frequency","d":"M","p":"Bucket sort by count","l":2,"src":"T"},{"n":28,"t":"Largest Number","s":"largest-number","d":"M","p":"Custom comparator sort","l":2,"src":"R"},{"n":29,"t":"4Sum","s":"4sum","d":"M","p":"Sort + two pointers (like 3Sum)","l":2,"src":"T"},{"n":30,"t":"Fruit Into Baskets","s":"fruit-into-baskets","d":"M","p":"Sliding window, at most two kinds","l":2,"src":"T"},{"n":31,"t":"Contiguous Array","s":"contiguous-array","d":"M","p":"Prefix sum + hashmap, balance trick (like Subarray Sum Equals K)","l":2,"src":"T"},{"n":32,"t":"Smallest Stable Index II","s":"smallest-stable-index-ii","d":"M","p":"Prefix max + suffix min","l":2,"src":"T"},{"n":33,"t":"Count Commas in Range II","s":"count-commas-in-range-ii","d":"M","p":"Count by digit-length ranges","l":2,"src":"T"},{"n":34,"t":"Find First and Last Position of Element in Sorted Array","s":"find-first-and-last-position-of-element-in-sorted-array","d":"M","p":"Binary search bounds","l":2,"src":"T"},{"n":35,"t":"Split Array Largest Sum","s":"split-array-largest-sum","d":"H","p":"Binary search on answer, minimize the max (like #13)","l":2,"src":"T"},{"n":36,"t":"Minimum Sum of Squared Difference","s":"minimum-sum-of-squared-difference","d":"M","p":"Greedy level-down of the largest gaps","l":2,"src":"T"},{"n":37,"t":"Valid Parenthesis String","s":"valid-parenthesis-string","d":"M","p":"Greedy range of open counts","l":2,"src":"T"},{"n":38,"t":"Basic Calculator II","s":"basic-calculator-ii","d":"M","p":"Stack expression eval","l":2,"src":"T"},{"n":39,"t":"Basic Calculator","s":"basic-calculator","d":"H","p":"Stack with parentheses","l":2,"src":"T"},{"n":40,"t":"Online Stock Span","s":"online-stock-span","d":"M","p":"Monotonic stack on a stream (like Daily Temperatures)","l":2,"src":"T"},{"n":41,"t":"Beautiful Towers II","s":"beautiful-towers-ii","d":"M","p":"Monotonic stack, prefix and suffix sums","l":2,"src":"T"},{"n":42,"t":"Longest Increasing Subsequence","s":"longest-increasing-subsequence","d":"M","p":"DP / patience sort","l":2,"src":"T"},{"n":43,"t":"Delete and Earn","s":"delete-and-earn","d":"M","p":"House Robber over values (like House Robber)","l":2,"src":"T"},{"n":44,"t":"Edit Distance","s":"edit-distance","d":"M","p":"2D DP","l":2,"src":"T"},{"n":45,"t":"Subsets II","s":"subsets-ii","d":"M","p":"Backtracking, skip duplicates (like Subsets)","l":2,"src":"T"},{"n":46,"t":"Palindrome Partitioning","s":"palindrome-partitioning","d":"M","p":"Backtracking + palindrome check","l":2,"src":"T"},{"n":47,"t":"Maximum XOR of Two Numbers in an Array","s":"maximum-xor-of-two-numbers-in-an-array","d":"M","p":"Bitwise trie, greedy from the top bit","l":2,"src":"T"},{"n":48,"t":"Palindrome Linked List","s":"palindrome-linked-list","d":"E","p":"Reverse the second half","l":2,"src":"T"},{"n":49,"t":"Binary Tree Zigzag Level Order Traversal","s":"binary-tree-zigzag-level-order-traversal","d":"M","p":"BFS, alternate direction (like Level Order Traversal)","l":2,"src":"T"},{"n":50,"t":"Alien Dictionary","s":"alien-dictionary","d":"H","p":"Topological sort from constraints (like Course Schedule)","l":2,"src":"R"},{"n":51,"t":"Integer to Roman","s":"integer-to-roman","d":"M","p":"Greedy symbol mapping (reverse of #7)","l":3,"src":"T"},{"n":52,"t":"Minimum Insertions to Balance a Parentheses String","s":"minimum-insertions-to-balance-a-parentheses-string","d":"M","p":"Greedy counter of needed closes","l":3,"src":"T"},{"n":53,"t":"Maximum Nesting Depth of Two Valid Parentheses Strings","s":"maximum-nesting-depth-of-two-valid-parentheses-strings","d":"M","p":"Split by depth parity","l":3,"src":"T"},{"n":54,"t":"Remove K Digits","s":"remove-k-digits","d":"M","p":"Monotonic stack, greedy","l":3,"src":"T"},{"n":55,"t":"Next Greater Element II","s":"next-greater-element-ii","d":"M","p":"Monotonic stack, circular","l":3,"src":"T"},{"n":56,"t":"Find All Anagrams in a String","s":"find-all-anagrams-in-a-string","d":"M","p":"Fixed window + counts (like Permutation in String)","l":3,"src":"T"},{"n":57,"t":"Minimum Size Subarray Sum","s":"minimum-size-subarray-sum","d":"M","p":"Sliding window, shrink while valid","l":3,"src":"T"},{"n":58,"t":"Maximum Sum Circular Subarray","s":"maximum-sum-circular-subarray","d":"M","p":"Kadane, track max and min (like Maximum Subarray)","l":3,"src":"T"},{"n":59,"t":"Corporate Flight Bookings","s":"corporate-flight-bookings","d":"M","p":"Difference array","l":3,"src":"T"},{"n":60,"t":"Random Pick with Weight","s":"random-pick-with-weight","d":"M","p":"Prefix sum + binary search","l":3,"src":"T"},{"n":61,"t":"Maximize Greatness of an Array","s":"maximize-greatness-of-an-array","d":"M","p":"Sort + two pointers","l":3,"src":"T"},{"n":62,"t":"Boats to Save People","s":"boats-to-save-people","d":"M","p":"Sort + two pointers","l":3,"src":"T"},{"n":63,"t":"Find K Pairs with Smallest Sums","s":"find-k-pairs-with-smallest-sums","d":"M","p":"Min-heap frontier","l":3,"src":"T"},{"n":64,"t":"Single Number II","s":"single-number-ii","d":"M","p":"Count bits mod 3","l":3,"src":"T"},{"n":65,"t":"Rotate Image","s":"rotate-image","d":"M","p":"Transpose + reverse rows","l":3,"src":"R"},{"n":66,"t":"Image Overlap","s":"image-overlap","d":"M","p":"Count translation vectors","l":3,"src":"T"},{"n":67,"t":"Number of Closed Islands","s":"number-of-closed-islands","d":"M","p":"DFS, flood the border first (like Number of Islands)","l":3,"src":"T"},{"n":68,"t":"Rotting Oranges","s":"rotting-oranges","d":"M","p":"Multi-source BFS","l":3,"src":"T"},{"n":69,"t":"All Nodes Distance K in Binary Tree","s":"all-nodes-distance-k-in-binary-tree","d":"M","p":"Tree to graph + BFS","l":3,"src":"T"},{"n":70,"t":"Serialize and Deserialize Binary Tree","s":"serialize-and-deserialize-binary-tree","d":"H","p":"Preorder encode/decode","l":3,"src":"T"},{"n":71,"t":"Reorder List","s":"reorder-list","d":"M","p":"Fast/slow + reverse + merge","l":3,"src":"T"},{"n":72,"t":"Reverse Linked List II","s":"reverse-linked-list-ii","d":"M","p":"Linked list surgery","l":3,"src":"T"},{"n":73,"t":"Decode Ways","s":"decode-ways","d":"M","p":"1D DP on a string","l":3,"src":"T"},{"n":74,"t":"Coin Change II","s":"coin-change-ii","d":"M","p":"Unbounded knapsack, count ways (like Coin Change)","l":3,"src":"T"},{"n":75,"t":"Stone Game","s":"stone-game","d":"M","p":"Interval DP / game theory","l":3,"src":"T"},{"n":76,"t":"Best Time to Buy and Sell Stock II","s":"best-time-to-buy-and-sell-stock-ii","d":"M","p":"Greedy: sum every rise","l":4,"src":"T"},{"n":77,"t":"Jump Game II","s":"jump-game-ii","d":"M","p":"Greedy BFS levels (like #16)","l":4,"src":"T"},{"n":78,"t":"Increasing Triplet Subsequence","s":"increasing-triplet-subsequence","d":"M","p":"Greedy two smallest (you never got it accepted)","l":4,"src":"T"},{"n":79,"t":"Destroying Asteroids","s":"destroying-asteroids","d":"M","p":"Sort + greedy absorb","l":4,"src":"T"},{"n":80,"t":"Car Fleet","s":"car-fleet","d":"M","p":"Sort + stack (you never got it accepted)","l":4,"src":"T"},{"n":81,"t":"Frequency of the Most Frequent Element","s":"frequency-of-the-most-frequent-element","d":"M","p":"Sort + sliding window","l":4,"src":"T"},{"n":82,"t":"Find the Smallest Divisor Given a Threshold","s":"find-the-smallest-divisor-given-a-threshold","d":"M","p":"Binary search on answer (like Koko/Capacity)","l":4,"src":"T"},{"n":83,"t":"Search a 2D Matrix II","s":"search-a-2d-matrix-ii","d":"M","p":"Staircase search (like Search a 2D Matrix)","l":4,"src":"T"},{"n":84,"t":"Set Matrix Zeroes","s":"set-matrix-zeroes","d":"M","p":"In-place markers in the first row and column","l":4,"src":"T"},{"n":85,"t":"Maximum OR","s":"maximum-or","d":"M","p":"Prefix/suffix OR, double one element","l":4,"src":"T"},{"n":86,"t":"Count Subarrays With Majority Element I","s":"count-subarrays-with-majority-element-i","d":"M","p":"Prefix balance (+1/-1) counting","l":4,"src":"T"},{"n":87,"t":"Non-overlapping Intervals","s":"non-overlapping-intervals","d":"M","p":"Interval greedy by end time","l":4,"src":"T"},{"n":88,"t":"Maximum Number of Events That Can Be Attended","s":"maximum-number-of-events-that-can-be-attended","d":"M","p":"Sort + min-heap of end days","l":4,"src":"T"},{"n":89,"t":"Add Bold Tag in String","s":"add-bold-tag-in-string","d":"M","p":"Mark matches, then merge intervals (like Merge Intervals)","l":4,"src":"X"},{"n":90,"t":"Longest Common Subsequence","s":"longest-common-subsequence","d":"M","p":"2D DP","l":4,"src":"T"},{"n":91,"t":"New 21 Game","s":"new-21-game","d":"M","p":"Probability DP + sliding window sum","l":4,"src":"T"},{"n":92,"t":"Beautiful Arrangement","s":"beautiful-arrangement","d":"M","p":"Backtracking with a used set","l":4,"src":"T"},{"n":93,"t":"Word Search","s":"word-search","d":"M","p":"Grid backtracking","l":4,"src":"R"},{"n":94,"t":"Snakes and Ladders","s":"snakes-and-ladders","d":"M","p":"BFS over board squares","l":4,"src":"R"},{"n":95,"t":"Delete Node in a Linked List","s":"delete-node-in-a-linked-list","d":"M","p":"Copy the next node and skip it","l":4,"src":"T"},{"n":96,"t":"Kth Smallest Element in a BST","s":"kth-smallest-element-in-a-bst","d":"M","p":"In-order traversal","l":4,"src":"T"},{"n":97,"t":"Longest Path With Different Adjacent Characters","s":"longest-path-with-different-adjacent-characters","d":"H","p":"Tree DP, top two child chains (like Diameter of Binary Tree)","l":4,"src":"R"},{"n":98,"t":"Implement Queue using Stacks","s":"implement-queue-using-stacks","d":"E","p":"Two stacks, amortized","l":4,"src":"T"},{"n":99,"t":"Design Twitter","s":"design-twitter","d":"M","p":"Design: hashmap + heap merge (like Merge k Sorted Lists)","l":4,"src":"R"},{"n":100,"t":"LFU Cache","s":"lfu-cache","d":"H","p":"Design: hashmap + frequency buckets (like LRU Cache)","l":4,"src":"R"}],"laps":{"1":"The top 25 by live Microsoft frequency. If you only finish one lap, make it this one.","2":"Ranks 26–50: sorting, sliding windows, stacks and the calculator pair.","3":"Parentheses, monotonic stacks, graphs, trees and linked lists.","4":"Remaining patterns, plus the design and tree problems from SDE 1 reports that Microsoft hasn't tagged in the last six months."},"refresh":[{"n":1,"t":"Best Time to Buy and Sell Stock","s":"best-time-to-buy-and-sell-stock","d":"E","p":"Track the running min, best gap","l":1,"src":"T"},{"n":2,"t":"Subarray Sum Equals K","s":"subarray-sum-equals-k","d":"M","p":"Prefix sum + hashmap of counts","l":1,"src":"T"},{"n":3,"t":"Group Anagrams","s":"group-anagrams","d":"M","p":"Hash by sorted key or letter counts","l":1,"src":"R"},{"n":4,"t":"Longest Consecutive Sequence","s":"longest-consecutive-sequence","d":"M","p":"Hash set, start only at run heads","l":1,"src":"T"},{"n":5,"t":"3Sum","s":"3sum","d":"M","p":"Sort + two pointers, skip duplicates","l":1,"src":"T"},{"n":6,"t":"Trapping Rain Water","s":"trapping-rain-water","d":"H","p":"Two pointers with left/right max","l":1,"src":"R"},{"n":7,"t":"Longest Substring Without Repeating Characters","s":"longest-substring-without-repeating-characters","d":"M","p":"Sliding window + last-seen index","l":1,"src":"T"},{"n":8,"t":"Minimum Window Substring","s":"minimum-window-substring","d":"H","p":"Sliding window with a need/have count","l":1,"src":"T"},{"n":9,"t":"Sliding Window Maximum","s":"sliding-window-maximum","d":"H","p":"Monotonic deque of indices","l":1,"src":"T"},{"n":10,"t":"Search a 2D Matrix","s":"search-a-2d-matrix","d":"M","p":"Binary search over the flattened matrix","l":1,"src":"T"},{"n":11,"t":"Median of Two Sorted Arrays","s":"median-of-two-sorted-arrays","d":"H","p":"Binary search the partition of the shorter array","l":1,"src":"T"},{"n":12,"t":"Valid Parentheses","s":"valid-parentheses","d":"E","p":"Stack of open brackets","l":1,"src":"T"},{"n":13,"t":"Add Two Numbers","s":"add-two-numbers","d":"M","p":"Walk both lists with a carry","l":1,"src":"T"},{"n":14,"t":"Merge Two Sorted Lists","s":"merge-two-sorted-lists","d":"E","p":"Dummy head + splice the smaller node","l":1,"src":"T"},{"n":15,"t":"LRU Cache","s":"lru-cache","d":"M","p":"Hashmap + doubly linked list","l":1,"src":"R"},{"n":16,"t":"Kth Largest Element in an Array","s":"kth-largest-element-in-an-array","d":"M","p":"Min-heap of size k or quickselect","l":1,"src":"T"},{"n":17,"t":"Spiral Matrix","s":"spiral-matrix","d":"M","p":"Shrink four boundaries","l":1,"src":"T"},{"n":18,"t":"Reverse Integer","s":"reverse-integer","d":"M","p":"Pop digits, check overflow before pushing","l":1,"src":"T"},{"n":19,"t":"Number of Islands","s":"number-of-islands","d":"M","p":"DFS/BFS flood fill per unvisited land cell","l":1,"src":"T"},{"n":20,"t":"Diameter of Binary Tree","s":"diameter-of-binary-tree","d":"E","p":"DFS returns height, track left + right","l":1,"src":"T"},{"n":21,"t":"Subsets","s":"subsets","d":"M","p":"Backtracking include/skip","l":1,"src":"T"},{"n":22,"t":"Letter Combinations of a Phone Number","s":"letter-combinations-of-a-phone-number","d":"M","p":"Backtracking over digit mappings","l":1,"src":"T"},{"n":23,"t":"House Robber","s":"house-robber","d":"M","p":"1D DP: rob or skip","l":1,"src":"T"},{"n":24,"t":"Minimum Path Sum","s":"minimum-path-sum","d":"M","p":"Grid DP from top-left","l":1,"src":"T"},{"n":25,"t":"Longest Palindromic Substring","s":"longest-palindromic-substring","d":"M","p":"Expand around each center","l":1,"src":"T"},{"n":26,"t":"Product of Array Except Self","s":"product-of-array-except-self","d":"M","p":"Prefix and suffix products","l":2,"src":"T"},{"n":27,"t":"Maximum Subarray","s":"maximum-subarray","d":"M","p":"Kadane's algorithm","l":2,"src":"T"},{"n":28,"t":"Sort Colors","s":"sort-colors","d":"M","p":"Dutch national flag, three pointers","l":2,"src":"T"},{"n":29,"t":"Two Sum II - Input Array Is Sorted","s":"two-sum-ii-input-array-is-sorted","d":"M","p":"Two pointers from both ends","l":2,"src":"T"},{"n":30,"t":"Container With Most Water","s":"container-with-most-water","d":"M","p":"Two pointers, move the shorter side","l":2,"src":"T"},{"n":31,"t":"Reverse Words in a String","s":"reverse-words-in-a-string","d":"M","p":"Split and reverse, or reverse all then each word","l":2,"src":"T"},{"n":32,"t":"Merge Intervals","s":"merge-intervals","d":"M","p":"Sort by start, extend or push","l":2,"src":"R"},{"n":33,"t":"Binary Search","s":"binary-search","d":"E","p":"Classic lo/hi bounds","l":2,"src":"R"},{"n":34,"t":"Find Minimum in Rotated Sorted Array","s":"find-minimum-in-rotated-sorted-array","d":"M","p":"Binary search against the right end","l":2,"src":"T"},{"n":35,"t":"Koko Eating Bananas","s":"koko-eating-bananas","d":"M","p":"Binary search on the answer","l":2,"src":"T"},{"n":36,"t":"Min Stack","s":"min-stack","d":"M","p":"Second stack of running minimums","l":2,"src":"T"},{"n":37,"t":"Minimum Add to Make Parentheses Valid","s":"minimum-add-to-make-parentheses-valid","d":"M","p":"Count open and unmatched closes","l":2,"src":"T"},{"n":38,"t":"Generate Parentheses","s":"generate-parentheses","d":"M","p":"Backtracking with open/close counts","l":2,"src":"T"},{"n":39,"t":"Asteroid Collision","s":"asteroid-collision","d":"M","p":"Stack, resolve collisions as you push","l":2,"src":"R"},{"n":40,"t":"Remove Duplicate Letters","s":"remove-duplicate-letters","d":"M","p":"Monotonic stack + last occurrence","l":2,"src":"T"},{"n":41,"t":"Largest Rectangle in Histogram","s":"largest-rectangle-in-histogram","d":"H","p":"Monotonic stack of increasing heights","l":2,"src":"T"},{"n":42,"t":"Linked List Cycle","s":"linked-list-cycle","d":"E","p":"Floyd's fast and slow pointers","l":2,"src":"T"},{"n":43,"t":"Copy List with Random Pointer","s":"copy-list-with-random-pointer","d":"M","p":"Hashmap old to new, or interleave nodes","l":2,"src":"T"},{"n":44,"t":"Merge k Sorted Lists","s":"merge-k-sorted-lists","d":"H","p":"Min-heap of list heads (like Merge Two Sorted Lists)","l":2,"src":"T"},{"n":45,"t":"Top K Frequent Elements","s":"top-k-frequent-elements","d":"M","p":"Count + bucket sort or heap","l":2,"src":"T"},{"n":46,"t":"Course Schedule","s":"course-schedule","d":"M","p":"Topological sort / cycle detection","l":2,"src":"T"},{"n":47,"t":"Shortest Path in Binary Matrix","s":"shortest-path-in-binary-matrix","d":"M","p":"BFS over 8 directions","l":2,"src":"T"},{"n":48,"t":"Lowest Common Ancestor of a Binary Tree","s":"lowest-common-ancestor-of-a-binary-tree","d":"M","p":"DFS returns the node found in each subtree","l":2,"src":"T"},{"n":49,"t":"Unique Paths","s":"unique-paths","d":"M","p":"Grid DP (or combinatorics)","l":2,"src":"T"},{"n":50,"t":"Word Break","s":"word-break","d":"M","p":"DP over prefixes with a word set","l":2,"src":"T"}],"rlaps":{"1":"Your 25 highest-scoring solved problems on the same Microsoft frequency. Re-solve each from a blank editor without looking at your old code.","2":"Ranks 26–50, plus Asteroid Collision from an SDE 1 report."}};
 const ROWS = DATA.rows;
+const RROWS = DATA.refresh;
 const DIFF = { E: "Easy", M: "Medium", H: "Hard" };
 const PACE = { E: 15, M: 25, H: 40 };
 // Every row is on the Microsoft list except "X"; only rows backed by an SDE 1 interview report get a chip.
@@ -217,7 +232,20 @@ const CONF = ["No confidence", "Unconfident", "Unsure", "Somewhat confident", "C
 // Every file:// page shares one storage origin in Chrome, so keys are namespaced per tracker.
 const LS_KEY = "microsoft100.state";
 const LS_HIDE = "microsoft100.hideDone";
-const KNOWN = new Set(ROWS.map((r) => r.s));
+// Both tracks share one state object; their slugs don't overlap.
+const KNOWN = new Set([...ROWS, ...RROWS].map((r) => r.s));
+
+// The 100 new problems, then the 50 already-solved problems to re-solve. Same rows, ticks and confidence.
+const TRACKS = [
+  { rows: ROWS, laps: DATA.laps, pre: "", lapName: "Lap", verb: "solved",
+    ids: { strip: "strip", count: "solvedCount", total: "totalCount", next: "nextCard", conf: "confSum", laps: "laps" },
+    doneText: (n) => `All ${n} solved. Go get the offer.` },
+  { rows: RROWS, laps: DATA.rlaps, pre: "R", lapName: "Refresh lap", verb: "refreshed",
+    ids: { strip: "rStrip", count: "rCount", total: "rTotal", next: "rNextCard", conf: "rConfSum", laps: "rLaps" },
+    doneText: (n) => `All ${n} refreshed.` },
+];
+const label = (t, r) => `#${t.pre}${r.n}`;
+const rowId = (t, r) => "row-" + t.pre.toLowerCase() + r.n;
 
 // solved: slug -> solved-at ms; confidence: slug -> 0..4; revealed: slug -> bool (absent = follow solved);
 // updatedAt: ms of the last change, used to pick the newer of this browser and progress.json.
@@ -249,74 +277,75 @@ const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const lcUrl = (s) => `https://leetcode.com/problems/${s}/`;
 const isRevealed = (s) => state.revealed[s] ?? !!state.solved[s];
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-// Build the static structure once.
-const strip = $("strip");
-const cells = ROWS.map((r) => {
-  const b = el("button", "cell");
-  b.type = "button";
-  b.title = `#${r.n} ${r.t}`;
-  b.setAttribute("aria-label", `Jump to #${r.n} ${r.t}`);
-  b.addEventListener("click", () => document.getElementById("row-" + r.n).scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" }));
-  strip.appendChild(b);
-  return b;
-});
-
-function confPicker(r) {
+function confPicker(t, r) {
   const wrap = el("div", "conf");
   wrap.append(el("span", "clabel", "Confidence"));
   const fs = el("fieldset", "seg");
-  fs.append(el("legend", null, `Confidence for #${r.n} ${r.t}`));
-  const radios = CONF.map((label, i) => {
+  fs.append(el("legend", null, `Confidence for ${label(t, r)} ${r.t}`));
+  const radios = CONF.map((text, i) => {
     const lab = el("label"); lab.dataset.l = i;
     const inp = document.createElement("input");
     inp.type = "radio"; inp.name = "conf-" + r.s; inp.value = i;
     inp.addEventListener("change", () => { if (inp.checked) setConf(r.s, i); });
-    lab.append(inp, el("span", null, label));
+    lab.append(inp, el("span", null, text));
     fs.append(lab);
     return inp;
   });
   const sel = document.createElement("select");
-  sel.setAttribute("aria-label", `Confidence for #${r.n} ${r.t}`);
+  sel.setAttribute("aria-label", `Confidence for ${label(t, r)} ${r.t}`);
   const ph = el("option", null, "Rate confidence…"); ph.value = ""; ph.disabled = true;
-  sel.append(ph, ...CONF.map((label, i) => { const o = el("option", null, label); o.value = i; return o; }));
+  sel.append(ph, ...CONF.map((text, i) => { const o = el("option", null, text); o.value = i; return o; }));
   sel.addEventListener("change", () => { if (sel.value !== "") setConf(r.s, Number(sel.value)); });
   wrap.append(fs, sel);
   return { wrap, radios, sel };
 }
 
-const lapEls = {};
+// Build the static structure once per track.
 const rowEls = {};
-for (const lap of [1, 2, 3, 4]) {
-  const sec = el("section", "lap");
-  const head = el("div", "lap-head");
-  const lapRows = ROWS.filter((x) => x.l === lap);
-  head.append(el("h3", null, `Lap ${lap}  ·  #${lapRows[0].n}–${lapRows[lapRows.length - 1].n}`));
-  const lc = el("span", "lc");
-  head.append(lc);
-  const bar = el("div", "bar"); const fill = el("i"); bar.append(fill);
-  const ol = el("ol", "rows");
-  sec.append(head, el("p", "lap-blurb", DATA.laps[lap]), bar, ol);
-  $("laps").append(sec);
-  lapEls[lap] = { lc, fill, size: lapRows.length };
-  for (const r of lapRows) {
-    const li = el("li", "row"); li.id = "row-" + r.n;
-    const cb = document.createElement("input");
-    cb.type = "checkbox"; cb.id = "cb-" + r.s;
-    cb.setAttribute("aria-label", `Mark #${r.n} ${r.t} solved`);
-    cb.addEventListener("change", () => toggle(r.s, cb.checked));
-    const title = el("div", "title");
-    const a = el("a", null, r.t); a.href = lcUrl(r.s); a.target = "_blank"; a.rel = "noopener";
-    title.append(a, el("span", "diff " + r.d, DIFF[r.d]), ...srcChip(r));
-    const pat = el("div", "pattern");
-    const patText = el("span", "pat-text");
-    const peek = el("button", "peek"); peek.type = "button";
-    peek.addEventListener("click", () => setRevealed(r.s, !isRevealed(r.s)));
-    pat.append(patText, peek);
-    const conf = confPicker(r);
-    li.append(cb, el("span", "num", r.n), title, pat, conf.wrap);
-    ol.append(li);
-    rowEls[r.s] = { li, cb, patText, peek, conf, shown: null };
+for (const t of TRACKS) {
+  t.cells = t.rows.map((r) => {
+    const b = el("button", "cell");
+    b.type = "button";
+    b.title = `${label(t, r)} ${r.t}`;
+    b.setAttribute("aria-label", `Jump to ${label(t, r)} ${r.t}`);
+    b.addEventListener("click", () => document.getElementById(rowId(t, r)).scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "center" }));
+    $(t.ids.strip).appendChild(b);
+    return b;
+  });
+  t.lapEls = {};
+  for (const lap of [...new Set(t.rows.map((r) => r.l))]) {
+    const sec = el("section", "lap");
+    const head = el("div", "lap-head");
+    const lapRows = t.rows.filter((x) => x.l === lap);
+    head.append(el("h3", null, `${t.lapName} ${lap}  ·  ${label(t, lapRows[0])}–${t.pre}${lapRows[lapRows.length - 1].n}`));
+    const lc = el("span", "lc");
+    head.append(lc);
+    const bar = el("div", "bar"); const fill = el("i"); bar.append(fill);
+    const ol = el("ol", "rows");
+    sec.append(head, el("p", "lap-blurb", t.laps[lap]), bar, ol);
+    $(t.ids.laps).append(sec);
+    t.lapEls[lap] = { lc, fill, size: lapRows.length };
+    for (const r of lapRows) {
+      const li = el("li", "row"); li.id = rowId(t, r);
+      const cb = document.createElement("input");
+      cb.type = "checkbox"; cb.id = "cb-" + r.s;
+      cb.setAttribute("aria-label", `Mark ${label(t, r)} ${r.t} ${t.verb}`);
+      cb.addEventListener("change", () => toggle(r.s, cb.checked));
+      const title = el("div", "title");
+      const a = el("a", null, r.t); a.href = lcUrl(r.s); a.target = "_blank"; a.rel = "noopener";
+      title.append(a, el("span", "diff " + r.d, DIFF[r.d]), ...srcChip(r));
+      const pat = el("div", "pattern");
+      const patText = el("span", "pat-text");
+      const peek = el("button", "peek"); peek.type = "button";
+      peek.addEventListener("click", () => setRevealed(r.s, !isRevealed(r.s)));
+      pat.append(patText, peek);
+      const conf = confPicker(t, r);
+      li.append(cb, el("span", "num", t.pre + r.n), title, pat, conf.wrap);
+      ol.append(li);
+      rowEls[r.s] = { li, cb, patText, peek, conf, shown: null };
+    }
   }
 }
 
@@ -324,14 +353,16 @@ const hideDone = $("hideDone");
 hideDone.checked = lsGet(LS_HIDE) === "1";
 hideDone.addEventListener("change", () => { lsSet(LS_HIDE, hideDone.checked ? "1" : "0"); render(); });
 
-function render() {
-  const next = ROWS.find((r) => !state.solved[r.s]);
+function render() { for (const t of TRACKS) renderTrack(t); }
+
+function renderTrack(t) {
+  const next = t.rows.find((r) => !state.solved[r.s]);
   let total = 0;
-  ROWS.forEach((r, i) => {
+  t.rows.forEach((r, i) => {
     const done = !!state.solved[r.s];
     if (done) total++;
-    cells[i].classList.toggle("done", done);
-    cells[i].classList.toggle("next", next === r);
+    t.cells[i].classList.toggle("done", done);
+    t.cells[i].classList.toggle("next", next === r);
     const re = rowEls[r.s];
     re.cb.checked = done;
     re.li.classList.toggle("done", done);
@@ -339,62 +370,62 @@ function render() {
     re.li.classList.toggle("hide", done && hideDone.checked);
     const vis = isRevealed(r.s);
     if (re.shown !== vis) {
-      re.patText.replaceChildren(vis ? el("span", "shown", r.p) : el("span", "hidden-pat", "solve to reveal"));
+      re.patText.replaceChildren(vis ? el("span", "shown", r.p) : el("span", "hidden-pat", `${t.verb === "solved" ? "solve" : "refresh"} to reveal`));
       re.shown = vis;
     }
     re.peek.textContent = vis ? "Hide" : "Show";
     re.peek.setAttribute("aria-pressed", String(vis));
-    re.peek.setAttribute("aria-label", `${vis ? "Hide" : "Show"} pattern for #${r.n} ${r.t}`);
+    re.peek.setAttribute("aria-label", `${vis ? "Hide" : "Show"} pattern for ${label(t, r)} ${r.t}`);
     const c = state.confidence[r.s];
     re.conf.radios.forEach((inp, k) => { inp.checked = c === k; inp.disabled = !done; });
     re.conf.sel.value = c == null ? "" : String(c);
     re.conf.sel.disabled = !done;
     if (c == null) delete re.conf.sel.dataset.l; else re.conf.sel.dataset.l = c;
   });
-  for (const lap of [1, 2, 3, 4]) {
-    const n = ROWS.filter((r) => r.l === lap && state.solved[r.s]).length;
-    lapEls[lap].lc.textContent = `${n} / ${lapEls[lap].size}`;
-    lapEls[lap].fill.style.width = (n / lapEls[lap].size * 100) + "%";
+  for (const [lap, le] of Object.entries(t.lapEls)) {
+    const n = t.rows.filter((r) => r.l === Number(lap) && state.solved[r.s]).length;
+    le.lc.textContent = `${n} / ${le.size}`;
+    le.fill.style.width = (n / le.size * 100) + "%";
   }
-  $("solvedCount").textContent = total;
-  $("totalCount").textContent = ROWS.length;
-  renderConfSummary(total);
-  renderNext(next);
+  $(t.ids.count).textContent = total;
+  $(t.ids.total).textContent = t.rows.length;
+  renderConfSummary(t, total);
+  renderNext(t, next);
 }
 
-function renderConfSummary(total) {
-  const box = $("confSum");
+function renderConfSummary(t, total) {
+  const box = $(t.ids.conf);
   if (!total) { box.replaceChildren(el("span", null, "Confidence: rate each problem after you tick it.")); return; }
   const counts = [0, 0, 0, 0, 0];
   let unrated = 0;
-  for (const r of ROWS) {
+  for (const r of t.rows) {
     if (!state.solved[r.s]) continue;
     const c = state.confidence[r.s];
     if (c == null) unrated++; else counts[c]++;
   }
   const parts = [el("span", "lbl", "Confidence")];
-  CONF.forEach((label, i) => {
+  CONF.forEach((text, i) => {
     const k = el("span", "k"); const sw = el("i"); sw.style.background = `var(--c${i})`;
-    k.append(sw, el("span", null, label + " "), el("b", null, counts[i]));
+    k.append(sw, el("span", null, text + " "), el("b", null, counts[i]));
     parts.push(k);
   });
   if (unrated) { const k = el("span", "k"); k.append(el("span", null, "Unrated "), el("b", null, unrated)); parts.push(k); }
   box.replaceChildren(...parts);
 }
 
-function renderNext(r) {
-  const card = $("nextCard");
+function renderNext(t, r) {
+  const card = $(t.ids.next);
   if (!r) {
-    card.replaceChildren(el("span", "eyebrow", "Done"), el("h2", null, `All ${ROWS.length} solved. Go get the offer.`));
+    card.replaceChildren(el("span", "eyebrow", "Done"), el("h2", null, t.doneText(t.rows.length)));
     return;
   }
-  const h = el("h2"); const a = el("a", null, `#${r.n}  ${r.t}`); a.href = lcUrl(r.s); a.target = "_blank"; a.rel = "noopener"; h.append(a);
+  const h = el("h2"); const a = el("a", null, `${label(t, r)}  ${r.t}`); a.href = lcUrl(r.s); a.target = "_blank"; a.rel = "noopener"; h.append(a);
   const row = el("div", "next-row");
   const open = el("a", "btn primary", "Open on LeetCode ↗"); open.href = lcUrl(r.s); open.target = "_blank"; open.rel = "noopener";
-  const mark = el("button", "btn", "Mark solved"); mark.type = "button";
+  const mark = el("button", "btn", `Mark ${t.verb}`); mark.type = "button";
   mark.addEventListener("click", () => toggle(r.s, true));
   row.append(open, mark, el("span", "diff " + r.d, DIFF[r.d]), ...srcChip(r), el("span", "pace", `aim for ${PACE[r.d]} min`));
-  card.replaceChildren(el("span", "eyebrow", `Up next · Lap ${r.l}`), h, row);
+  card.replaceChildren(el("span", "eyebrow", `Up next · ${t.lapName} ${r.l}`), h, row);
 }
 
 // Ticking reveals the pattern; unticking hides it. Confidence is kept either way.
