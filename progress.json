@@ -1,7 +1,7 @@
 {
   "app": "microsoft100",
   "v": 1,
-  "updatedAt": 1795024744653,
+  "updatedAt": 1795034769515,
   "solved": {
     "merge-sorted-array": 1794968740823,
     "majority-element": 1794968741370,
@@ -9,7 +9,8 @@
     "next-permutation": 1794968743345,
     "minimum-operations-to-sort-a-permutation": 1794971921953,
     "number-of-perfect-pairs": 1795014260983,
-    "roman-to-integer": 1795020873774
+    "roman-to-integer": 1795020873774,
+    "count-vowel-substrings-of-a-string": 1795034767200
   },
   "confidence": {
     "merge-sorted-array": 1,
@@ -18,7 +19,8 @@
     "next-permutation": 0,
     "minimum-operations-to-sort-a-permutation": 1,
     "number-of-perfect-pairs": 1,
-    "roman-to-integer": 4
+    "roman-to-integer": 4,
+    "count-vowel-substrings-of-a-string": 1
   },
   "revealed": {
     "merge-sorted-array": true,
@@ -28,6 +30,6 @@
     "minimum-operations-to-sort-a-permutation": true,
     "number-of-perfect-pairs": true,
     "roman-to-integer": true,
-    "count-vowel-substrings-of-a-string": false
+    "count-vowel-substrings-of-a-string": true
   }
 }
