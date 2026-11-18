@@ -1,8 +1,26 @@
 {
   "app": "microsoft100",
   "v": 1,
-  "updatedAt": 0,
-  "solved": {},
-  "confidence": {},
-  "revealed": {}
+  "updatedAt": 1794971923443,
+  "solved": {
+    "merge-sorted-array": 1794968740823,
+    "majority-element": 1794968741370,
+    "rotate-array": 1794968742142,
+    "next-permutation": 1794968743345,
+    "minimum-operations-to-sort-a-permutation": 1794971921953
+  },
+  "confidence": {
+    "merge-sorted-array": 1,
+    "majority-element": 1,
+    "rotate-array": 1,
+    "next-permutation": 0,
+    "minimum-operations-to-sort-a-permutation": 1
+  },
+  "revealed": {
+    "merge-sorted-array": true,
+    "majority-element": true,
+    "rotate-array": true,
+    "next-permutation": true,
+    "minimum-operations-to-sort-a-permutation": true
+  }
 }
