@@ -192,12 +192,16 @@ footer { font-size: 13px; color: var(--muted); }
 
   <footer style="display:flex;flex-direction:column;gap:12px">
     <div class="backup">
+      <button class="btn" type="button" id="linkBtn">Link progress.json</button>
+      <span class="note" id="fileNote">Link the progress.json in this repo to sync progress through git.</span>
+    </div>
+    <div class="backup">
       <button class="btn" type="button" id="exportBtn">Download backup</button>
       <button class="btn" type="button" id="importBtn">Restore from backup</button>
       <input type="file" id="importFile" accept=".json,application/json" hidden>
       <span class="note" id="backupNote"></span>
     </div>
-    <div>Progress, revealed patterns and confidence are saved in this browser, so they survive restarts and work offline. Clearing Chrome's browsing data would erase them, so download a backup now and then. Patterns stay hidden until you tick a problem or press Show. Ranked by your LeetCode Premium Microsoft frequency on 2026-11-17 and tuned for SWE 1 / IC2, with your 236 solved problems removed. "SDE 1 report" marks problems named in Microsoft SDE 1 / L59 / L60 / new-grad interview posts.</div>
+    <div>Progress, revealed patterns and confidence are saved in this browser, so they survive restarts and work offline. Once progress.json is linked, every change is also written to that file: commit and push it, then pull on another device and the newer copy wins. Clearing Chrome's browsing data erases the browser copy, so keep progress.json pushed or download a backup now and then. Patterns stay hidden until you tick a problem or press Show. Ranked by your LeetCode Premium Microsoft frequency on 2026-11-17 and tuned for SWE 1 / IC2, with your 236 solved problems removed. "SDE 1 report" marks problems named in Microsoft SDE 1 / L59 / L60 / new-grad interview posts.</div>
   </footer>
 </div>
 
@@ -215,8 +219,9 @@ const LS_KEY = "microsoft100.state";
 const LS_HIDE = "microsoft100.hideDone";
 const KNOWN = new Set(ROWS.map((r) => r.s));
 
-// solved: slug -> solved-at ms; confidence: slug -> 0..4; revealed: slug -> bool (absent = follow solved)
-let state = { v: 1, solved: {}, confidence: {}, revealed: {} };
+// solved: slug -> solved-at ms; confidence: slug -> 0..4; revealed: slug -> bool (absent = follow solved);
+// updatedAt: ms of the last change, used to pick the newer of this browser and progress.json.
+let state = { v: 1, updatedAt: 0, solved: {}, confidence: {}, revealed: {} };
 let storageOk = true;
 
 function lsGet(k) { try { return localStorage.getItem(k); } catch { storageOk = false; return null; } }
@@ -225,8 +230,9 @@ function probeStorage() { try { localStorage.setItem("microsoft100.probe", "1");
 
 // Accepts current state, older backups that only have `solved`, and anything in between.
 function sanitize(raw) {
-  const out = { v: 1, solved: {}, confidence: {}, revealed: {} };
+  const out = { v: 1, updatedAt: 0, solved: {}, confidence: {}, revealed: {} };
   if (!raw || typeof raw !== "object") return out;
+  out.updatedAt = Number(raw.updatedAt) || 0;
   for (const [s, t] of Object.entries(raw.solved || {})) if (KNOWN.has(s)) out.solved[s] = Number(t) || Date.now();
   for (const [s, c] of Object.entries(raw.confidence || {})) {
     const n = Number(c);
@@ -404,9 +410,14 @@ function setConf(slug, level) {
   save(); render();
 }
 
-function save() {
+function persist() {
   lsSet(LS_KEY, JSON.stringify(state));
   showStatus();
+}
+function save() {
+  state.updatedAt = Date.now();
+  persist();
+  queueFileWrite();
 }
 
 function showStatus() {
@@ -447,6 +458,119 @@ $("importFile").addEventListener("change", async (e) => {
     $("backupNote").textContent = "That file isn't a Microsoft 100 backup. Pick a file made with Download backup.";
   }
 });
+
+// progress.json sync. Chrome lets a file:// page keep a handle to one file and rewrite it in place,
+// so every change lands in the git repo next to this page. The handle is kept in IndexedDB so the
+// link survives restarts; Chrome may ask again for write access, which the Reconnect button handles.
+const FS_OK = "showOpenFilePicker" in window && "indexedDB" in window;
+let fileHandle = null;
+let fileConnected = false;
+let writeTimer = null;
+
+function idb(mode, fn) {
+  return new Promise((resolve, reject) => {
+    const open = indexedDB.open("microsoft100", 1);
+    open.onupgradeneeded = () => open.result.createObjectStore("handles");
+    open.onerror = () => reject(open.error);
+    open.onsuccess = () => {
+      const db = open.result, tx = db.transaction("handles", mode), req = fn(tx.objectStore("handles"));
+      tx.oncomplete = () => { db.close(); resolve(req.result); };
+      tx.onerror = () => { db.close(); reject(tx.error); };
+    };
+  });
+}
+const fileNote = (text) => { $("fileNote").textContent = text; };
+const clock = () => new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+function setFileState(connected, label) {
+  fileConnected = connected;
+  $("linkBtn").textContent = label;
+}
+
+async function writeFile() {
+  if (!fileHandle || !fileConnected) return;
+  try {
+    const w = await fileHandle.createWritable();
+    await w.write(JSON.stringify({ app: "microsoft100", ...state }, null, 2) + "\n");
+    await w.close();
+    fileNote(`Saved to ${fileHandle.name} at ${clock()}. Commit and push to sync.`);
+  } catch {
+    setFileState(false, `Reconnect ${fileHandle.name}`);
+    fileNote(`Couldn't write ${fileHandle.name}. Click Reconnect.`);
+  }
+}
+function queueFileWrite() {
+  if (!fileConnected) return;
+  clearTimeout(writeTimer);
+  writeTimer = setTimeout(writeFile, 300);
+}
+
+// Newer copy wins: adopt the file if it was updated more recently, otherwise write this browser's state to it.
+async function syncWithFile() {
+  if (!fileHandle || !fileConnected) return;
+  let raw;
+  try {
+    const text = await (await fileHandle.getFile()).text();
+    raw = text.trim() ? JSON.parse(text) : {};
+  } catch {
+    fileNote(`${fileHandle.name} isn't valid JSON (a git merge conflict?). Fix it or link another file; it was left untouched.`);
+    return;
+  }
+  if (raw && raw.app && raw.app !== "microsoft100") {
+    setFileState(false, "Link progress.json");
+    fileHandle = null;
+    idb("readwrite", (s) => s.delete("progress")).catch(() => {});
+    fileNote("That file belongs to a different tracker. Link this repo's progress.json.");
+    return;
+  }
+  const incoming = sanitize(raw);
+  if (incoming.updatedAt > state.updatedAt) {
+    state = incoming; persist(); render();
+    fileNote(`Loaded newer progress from ${fileHandle.name} at ${clock()}.`);
+  } else if (incoming.updatedAt < state.updatedAt || JSON.stringify(incoming) !== JSON.stringify(state)) {
+    // Ties go to this browser, so linking the blank starter file seeds it with existing progress.
+    await writeFile();
+  } else {
+    fileNote(`In sync with ${fileHandle.name}.`);
+  }
+}
+
+async function connectFile(handle, ask) {
+  fileHandle = handle;
+  const opts = { mode: "readwrite" };
+  let perm = await handle.queryPermission(opts);
+  if (perm !== "granted" && ask) perm = await handle.requestPermission(opts);
+  if (perm !== "granted") {
+    setFileState(false, `Reconnect ${handle.name}`);
+    fileNote(`Click Reconnect so changes keep going to ${handle.name}.`);
+    return;
+  }
+  setFileState(true, "Change file");
+  await syncWithFile();
+}
+
+$("linkBtn").addEventListener("click", async () => {
+  try {
+    if (fileHandle && !fileConnected) return await connectFile(fileHandle, true);
+    const [handle] = await window.showOpenFilePicker({ id: "microsoft100", types: [{ description: "Progress file", accept: { "application/json": [".json"] } }] });
+    try { await idb("readwrite", (s) => s.put(handle, "progress")); } catch {}
+    await connectFile(handle, true);
+  } catch (e) {
+    if (e?.name !== "AbortError") fileNote("Couldn't open that file.");
+  }
+});
+
+// Coming back to the tab (say, after a git pull) picks up a newer progress.json.
+document.addEventListener("visibilitychange", () => { if (!document.hidden) syncWithFile(); });
+
+if (FS_OK) {
+  idb("readonly", (s) => s.get("progress"))
+    .then((h) => h && connectFile(h, false))
+    .catch(() => {});
+} else {
+  $("linkBtn").hidden = true;
+  fileNote("This browser can't write files directly. Use Download backup into the repo as progress.json, and Restore from backup after pulling.");
+}
 
 render();
 showStatus();
